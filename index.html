@@ -22,19 +22,41 @@
             <div class="col-md-9">
                 <div class="card">
                     <div class="card-header text-center">Game</div>
-                    <h5 class="card-title">Time: <span id="timeLeft">30</span></h5>
-                    <div class="btn-group-toggle mx-auto" data-toggle="buttons">
-                        <label class="btn">
-                                <input type="radio" id="rockImg"> <img src="assets/images/rockPlayer.png"></button>
-                        </label>
-                        <label class="btn">
-                                <input type="radio" id="paperImg"> <img src="assets/images/paperPlayer.png"></button>
-                        </label>
-                        <label class="btn">
-                                <input type="radio" id="scissorsImg"> <img src="assets/images/scissorsPlayer.png"></button>
-                        </label>
-                    </div>
-
+                    <ul class="list-group list-group-flush">
+                        <!-- <li class="list-group-item text-center">Time: <span id="timeLeft">30</span></li> -->
+                        <li class="list-group-item mx-auto">
+                            <div class="btn-group-toggle" data-toggle="buttons">
+                                <label class="btn">
+                                    <input type="radio" id="rockImg"> <img src="assets/images/rockPlayer.png"></button>
+                                </label>
+                                <label class="btn">
+                                    <input type="radio" id="paperImg"> <img src="assets/images/paperPlayer.png"></button>
+                                </label>
+                                <label class="btn">
+                                    <input type="radio" id="scissorsImg"> <img src="assets/images/scissorsPlayer.png"></button>
+                                </label>
+                            </div>
+                        </li>
+                        <li class="list-group-item">
+                            <button role="button" class="btn btn-danger btn-lg btn-block">Fight!</button>
+                        </li>
+                        <li class="list-group-item">
+                            <div class="card-deck">
+                                <div class="card">
+                                    <img class="card-img-top p-1 " src="assets/images/questionMark.png" alt="Card image cap">
+                                    <button type="button" class="btn" disabled>Not Submitted</button>
+                                </div>
+                                <div class="card">
+                                    <img class="card-img-top p-1" src="assets/images/waiting.png" alt="versus image">
+                                    <button type="button" class="btn" disabled>Waiting</button>
+                                </div>
+                                <div class="card">
+                                    <img class="card-img-top p-1" src="assets/images/questionMark.png" alt="Card image cap">
+                                    <button type="button" class="btn" disabled>Not Submitted</button>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
                 </div>
             </div>
 

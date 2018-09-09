@@ -7,5 +7,17 @@
      storageBucket: "",
      messagingSenderId: "742631516397"
  };
- firebase.initializeApp() 
- 
+ firebase.initializeApp(config);
+
+ let database = firebase.database();
+
+ let connectionsRef = database.ref("/connections");
+
+ let usersConnectedRef = database.ref(".info/connected");
+
+ usersConnectedRef.on('value', function (snapshot) {
+     if (snapshot.val()) {
+         let connect = connectionsRef.push(true);
+         connect.onDisconnect().remove();
+     }
+ })
