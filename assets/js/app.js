@@ -8,24 +8,75 @@
      messagingSenderId: "742631516397"
  };
  firebase.initializeApp(config);
-
-const userID = Math.random();
-
  let database = firebase.database();
 
- let connectionsRef = database.ref("/connections");
+ let user = {
+     number: 0,
+     connected: true,
+     inGame: false,
+     ID: Math.floor(Math.random() * 100000),
+     wins: 0,
+     ties: 0
+ }
 
- let usersConnectedRef = database.ref(".info/connected");
+ let allUsers = database.ref('/users/');
+ const userKey = allUsers.push(user).key;
+ console.log(userKey);
+ const userRef = database.ref('/users/' + userKey);
 
- connectionsRef.push(userID);
- connectionsRef.on('child_added', function(snap) {
-     console.log(snap.numUsers);
+
+ // Initializes each player's spot in line on load 
+ allUsers.once('value').then(function (snap) {
+     let numOfUsers = snap.numChildren();
+     userRef.update({
+         'number': numOfUsers
+     });
+    userRef.once('value').then(function(snap){
+        if(snap.val().number < 3)  {
+            userRef.update({
+                'inGame': true
+            })
+        }
+     })
  })
-//  console.log(connectionsRef.numChildren());
 
-//  let userNumber = connectionsRef.numChildren();
+ allUsers.orderByChild('number');
 
-//  usersConnectedRef.on('value', function (snapshot) {
-//      console.log(connectionsRef.numChildren());
 
-//  })
+ userRef.onDisconnect().remove();
+
+ allUsers.on('child_removed', function (snap) {
+     var removedIndex = snap.val().number
+     database.ref('/users/' + userKey + '/number').once('value').then(function (snap) {
+         if (snap.val().number < removedIndex) {
+             //do nothing
+         }else {
+             user.number = snap.val();
+             if (user.number > 1) {
+                 user.number--;
+                 userRef.update({
+                     'number': user.number
+                 });
+             }
+             if (user.number <= 2) {
+                console.log('here');
+                userRef.update({
+                    'inGame': true
+                })
+            }
+         }
+         
+     })
+ })
+
+ const playerChecker = () => {
+     if (!user.inGame) {
+         return
+     } else {
+         enableButtons();
+     }
+ }
+
+ const enableButtons = () => {
+
+ }
