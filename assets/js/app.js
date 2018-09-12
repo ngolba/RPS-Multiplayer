@@ -9,15 +9,23 @@
  };
  firebase.initializeApp(config);
 
+const userID = Math.random();
+
  let database = firebase.database();
 
  let connectionsRef = database.ref("/connections");
 
  let usersConnectedRef = database.ref(".info/connected");
 
- usersConnectedRef.on('value', function (snapshot) {
-     if (snapshot.val()) {
-         let connect = connectionsRef.push(true);
-         connect.onDisconnect().remove();
-     }
+ connectionsRef.push(userID);
+ connectionsRef.on('child_added', function(snap) {
+     console.log(snap.numUsers);
  })
+//  console.log(connectionsRef.numChildren());
+
+//  let userNumber = connectionsRef.numChildren();
+
+//  usersConnectedRef.on('value', function (snapshot) {
+//      console.log(connectionsRef.numChildren());
+
+//  })
