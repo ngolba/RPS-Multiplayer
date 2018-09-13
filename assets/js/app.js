@@ -135,8 +135,8 @@ userRef.onDisconnect().remove();
      }
  })
 
- allUsers.on('value', (snap) => {
-     if (snap.numChildren() >= 2) {
+ gameRef.on('value', (snap) => {
+     if (snap.numChildren() === 3) {
          gameRef.update({
              'running': true
          })
