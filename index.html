@@ -26,33 +26,33 @@
                         <!-- <li class="list-group-item text-center">Time: <span id="timeLeft">30</span></li> -->
                         <li class="list-group-item mx-auto">
                             <div class="btn-group-toggle" data-toggle="buttons">
-                                <label class="btn">
+                                <label class="btn" sign="rock">
                                     <input type="radio" id="rockImg"> <img src="assets/images/rockPlayer.png"></button>
                                 </label>
-                                <label class="btn">
+                                <label class="btn" sign="paper">
                                     <input type="radio" id="paperImg"> <img src="assets/images/paperPlayer.png"></button>
                                 </label>
-                                <label class="btn">
+                                <label class="btn" sign="scissors">
                                     <input type="radio" id="scissorsImg"> <img src="assets/images/scissorsPlayer.png"></button>
                                 </label>
                             </div>
                         </li>
                         <li class="list-group-item">
-                            <button role="button" class="btn btn-danger btn-lg btn-block">Fight!</button>
+                            <button role="button" class="btn btn-danger btn-lg btn-block" id="fightButton">Fight!</button>
                         </li>
                         <li class="list-group-item">
                             <div class="card-deck">
                                 <div class="card">
-                                    <img class="card-img-top p-1 " src="assets/images/questionMark.png" alt="Card image cap">
-                                    <button type="button" class="btn" disabled>Not Submitted</button>
+                                    <img class="card-img-top p-1 " id='player1Ready' src="assets/images/questionMark.png" alt="Card image cap">
+                                    <button type="button" class="btn" disabled id="player1Submitted">Not Submitted</button>
                                 </div>
                                 <div class="card">
-                                    <img class="card-img-top p-1" src="assets/images/waiting.png" alt="versus image">
+                                    <img class="card-img-top p-1" id="battleGround" src="assets/images/waiting.png" alt="versus image">
                                     <button type="button" class="btn" disabled>Waiting</button>
                                 </div>
                                 <div class="card">
-                                    <img class="card-img-top p-1" src="assets/images/questionMark.png" alt="Card image cap">
-                                    <button type="button" class="btn" disabled>Not Submitted</button>
+                                    <img class="card-img-top p-1" id="player2Ready" src="assets/images/questionMark.png" alt="Card image cap">
+                                    <button type="button" class="btn" disabled id="player2Submitted">Not Submitted</button>
                                 </div>
                             </div>
                         </li>
@@ -67,8 +67,8 @@
                             <div class="card-header text-center">Player Stats</div>
                             <ul class="list-group list-group-flush">
                                 <li class="list-group-item">Games Played: <span id="gamesPlayedDisplay"></span></li>
-                                <li class="list-group-item">Player One Wins: <span id="playerOneDisplay"></span></li>
-                                <li class="list-group-item">Player Two Wins: <span id="playerTwoDisplay"></span></li>
+                                <li class="list-group-item">Your Wins: <span id="playerDisplay"></span></li>
+                                <li class="list-group-item">Their Wins: <span id="opponentDisplay"></span></li>
                                 <li class="list-group-item">Ties: <span id="tiesDisplay"></span></li>
                             </ul>
                         </div>

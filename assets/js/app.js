@@ -16,41 +16,66 @@
      inGame: false,
      ID: Math.floor(Math.random() * 100000),
      wins: 0,
-     ties: 0
+     ties: 0,
+     choice: '',
  }
 
  let allUsers = database.ref('/users/');
- const userKey = allUsers.push(user).key;
- console.log(userKey);
- const userRef = database.ref('/users/' + userKey);
+ let userKey = allUsers.push(user).key;
+ const userDirectory = '/users/' + userKey;
+ console.log(userDirectory);
+ const userRef = database.ref(userDirectory);
+ const gameRef = database.ref('/game/');
+ let gameKey = '';
+ const gameDirectory = '/game/' + gameKey;
+ const playerRef = database.ref(gameDirectory);
+ let numInGame = 0;
 
+ const directoryMover = (oldDirectory, newDirectory) => {
+    oldDirectory.update({
+        'inGame': true
+    })
+     oldDirectory.once('value', (snap) => {
+         let file = snap.val();
+         oldDirectory.remove();
+         gameKey = newDirectory.push(file).key
+         console.log(gameKey)
+     })
+ }
 
  // Initializes each player's spot in line on load 
- allUsers.once('value').then(function (snap) {
-     let numOfUsers = snap.numChildren();
+ allUsers.once('value', function (snap) {
+     user.number = snap.numChildren();
      userRef.update({
-         'number': numOfUsers
+         'number': user.number
      });
-    userRef.once('value').then(function(snap){
-        if(snap.val().number < 3)  {
-            userRef.update({
-                'inGame': true
-            })
-        }
+     //  userRef.once('value').then((snap) => {
+
+     gameRef.once('value', (snap) => {
+         numInGame = (snap.numChildren() - 1);
+         if (numInGame < 2) {
+             user.number = (numInGame + 1)
+             userRef.update({
+                 'number': user.number
+             })
+             directoryMover(userRef, gameRef);
+         }
      })
  })
+ //  })
 
  allUsers.orderByChild('number');
 
+console.log(gameKey);
 
- userRef.onDisconnect().remove();
 
- allUsers.on('child_removed', function (snap) {
-     var removedIndex = snap.val().number
-     database.ref('/users/' + userKey + '/number').once('value').then(function (snap) {
+ allUsers.on('child_removed', (snap) => {
+     const removedIndex = snap.val().number
+     console.log(removedIndex)
+     database.ref(userDirectory + '/number').once('value').then((snap) => {
          if (snap.val().number < removedIndex) {
              //do nothing
-         }else {
+         } else {
              user.number = snap.val();
              if (user.number > 1) {
                  user.number--;
@@ -58,15 +83,10 @@
                      'number': user.number
                  });
              }
-             if (user.number <= 2) {
-                console.log('here');
-                userRef.update({
-                    'inGame': true
-                })
-            }
          }
-         
+
      })
+     userRef.onDisconnect().remove();
  })
 
  const playerChecker = () => {
@@ -77,6 +97,50 @@
      }
  }
 
- const enableButtons = () => {
+ const submitAnswer = (playerNumber) => {
+     $("label[sign]").each(function () {
+         if ($(this).hasClass('active')) {
+             user.choice = $('.active').attr('sign');
+             userRef.update({
+                 'choice': user.choice
+             })
+             $(`#player${playerNumber}Ready`).attr('src', "assets/images/checkmark.png");
+             $(`#player${playerNumber}Submitted`).attr('disabled', false).addClass('btn-success').text('Submitted');
+             disableButtons();
+         }
+     })
+
 
  }
+ const enableButtons = () => {
+     $('#fightButton').click((event) => {
+         submitAnswer(user.number)
+     })
+ }
+
+ const disableButtons = () => {
+     $('#fightButton').off('click');
+ }
+
+ database.ref(userDirectory + '/inGame').on('value', (snap) => {
+     if (snap.val() === true) {
+         enableButtons();
+     } else {
+         disableButtons();
+     }
+ })
+
+ allUsers.on('value', (snap) => {
+     if (snap.numChildren() >= 2) {
+         gameRef.update({
+             'running': true
+         })
+     } else {
+         gameRef.update({
+             'running': false
+         })
+     }
+ })
+
+ 
+ ///////////////// Game Space ///////////////////////////
