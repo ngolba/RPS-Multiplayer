@@ -38,7 +38,7 @@
      oldDirectory.once('value', (snap) => {
          let file = snap.val();
          oldDirectory.remove();
-         userDirectory = null;
+         userDirectory = '';
          gameKey = newDirectory.push(file).key
          gameDirectory = '/game/' + gameKey;
          playerRef = database.ref(gameDirectory);
@@ -76,7 +76,7 @@ userRef.onDisconnect().remove();
  allUsers.on('child_removed', (snap) => {
      const removedIndex = snap.val().number
      console.log(removedIndex)
-     if (userDirectory != null) {
+     if (userDirectory) {
          database.ref(userDirectory + '/number').once('value').then((snap) => {
              if (snap.val().number < removedIndex) {
                  //do nothing
