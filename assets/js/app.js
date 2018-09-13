@@ -22,24 +22,28 @@
 
  let allUsers = database.ref('/users/');
  let userKey = allUsers.push(user).key;
- const userDirectory = '/users/' + userKey;
- console.log(userDirectory);
+ let userDirectory = '/users/' + userKey;
  const userRef = database.ref(userDirectory);
  const gameRef = database.ref('/game/');
  let gameKey = '';
- const gameDirectory = '/game/' + gameKey;
- const playerRef = database.ref(gameDirectory);
+ let gameDirectory = '';
+ let playerRef = '';
+ 
  let numInGame = 0;
 
  const directoryMover = (oldDirectory, newDirectory) => {
-    oldDirectory.update({
-        'inGame': true
-    })
+     oldDirectory.update({
+         'inGame': true
+     })
      oldDirectory.once('value', (snap) => {
          let file = snap.val();
          oldDirectory.remove();
+         userDirectory = null;
          gameKey = newDirectory.push(file).key
-         console.log(gameKey)
+         gameDirectory = '/game/' + gameKey;
+         playerRef = database.ref(gameDirectory);
+         playerRef.onDisconnect().remove();
+       
      })
  }
 
@@ -66,27 +70,28 @@
 
  allUsers.orderByChild('number');
 
-console.log(gameKey);
 
+userRef.onDisconnect().remove();
 
  allUsers.on('child_removed', (snap) => {
      const removedIndex = snap.val().number
      console.log(removedIndex)
-     database.ref(userDirectory + '/number').once('value').then((snap) => {
-         if (snap.val().number < removedIndex) {
-             //do nothing
-         } else {
-             user.number = snap.val();
-             if (user.number > 1) {
-                 user.number--;
-                 userRef.update({
-                     'number': user.number
-                 });
+     if (userDirectory != null) {
+         database.ref(userDirectory + '/number').once('value').then((snap) => {
+             if (snap.val().number < removedIndex) {
+                 //do nothing
+             } else {
+                 user.number = snap.val();
+                 if (user.number > 1) {
+                     user.number--;
+                     userRef.update({
+                         'number': user.number
+                     });
+                 }
              }
-         }
-
-     })
-     userRef.onDisconnect().remove();
+         })
+     }
+     
  })
 
  const playerChecker = () => {
@@ -142,5 +147,5 @@ console.log(gameKey);
      }
  })
 
- 
+
  ///////////////// Game Space ///////////////////////////
