@@ -11,7 +11,7 @@
  let database = firebase.database();
 
  let user = {
-     number: 0,
+     number: 1,
      connected: true,
      inGame: false,
      ID: Math.floor(Math.random() * 100000),
@@ -28,8 +28,19 @@
  let gameKey = '';
  let gameDirectory = '';
  let playerRef = '';
- 
  let numInGame = 0;
+
+ /////////////// Necessary Functions
+
+ const enableButtons = () => {
+     $('#fightButton').click((event) => {
+         submitAnswer(user.number)
+     })
+ }
+
+ const disableButtons = () => {
+     $('#fightButton').off('click');
+ }
 
  const directoryMover = (oldDirectory, newDirectory) => {
      oldDirectory.update({
@@ -39,60 +50,14 @@
          let file = snap.val();
          oldDirectory.remove();
          userDirectory = '';
+         user.inGame = true;
          gameKey = newDirectory.push(file).key
          gameDirectory = '/game/' + gameKey;
          playerRef = database.ref(gameDirectory);
-         playerRef.onDisconnect().remove();
-       
+
      })
  }
 
- // Initializes each player's spot in line on load 
- allUsers.once('value', function (snap) {
-     user.number = snap.numChildren();
-     userRef.update({
-         'number': user.number
-     });
-     //  userRef.once('value').then((snap) => {
-
-     gameRef.once('value', (snap) => {
-         numInGame = (snap.numChildren() - 1);
-         if (numInGame < 2) {
-             user.number = (numInGame + 1)
-             userRef.update({
-                 'number': user.number
-             })
-             directoryMover(userRef, gameRef);
-         }
-     })
- })
- //  })
-
- allUsers.orderByChild('number');
-
-
-userRef.onDisconnect().remove();
-
- allUsers.on('child_removed', (snap) => {
-     const removedIndex = snap.val().number
-     console.log(removedIndex)
-     if (userDirectory) {
-         database.ref(userDirectory + '/number').once('value').then((snap) => {
-             if (snap.val().number < removedIndex) {
-                 //do nothing
-             } else {
-                 user.number = snap.val();
-                 if (user.number > 1) {
-                     user.number--;
-                     userRef.update({
-                         'number': user.number
-                     });
-                 }
-             }
-         })
-     }
-     
- })
 
  const playerChecker = () => {
      if (!user.inGame) {
@@ -114,25 +79,62 @@ userRef.onDisconnect().remove();
              disableButtons();
          }
      })
-
-
  }
- const enableButtons = () => {
-     $('#fightButton').click((event) => {
-         submitAnswer(user.number)
+ ///////////
+
+
+ // Initializes each player's spot in line on load 
+ allUsers.once('value', function (snap) {
+     user.number = snap.numChildren();
+     userRef.update({
+         'number': user.number
+     });
+     gameRef.once('value', (snap) => {
+         numInGame = (snap.numChildren() - 1);
+         if (numInGame < 2) {
+             user.number = (numInGame + 1)
+             userRef.update({
+                 'number': user.number
+             })
+             directoryMover(userRef, gameRef);
+         }
      })
- }
+ })
 
- const disableButtons = () => {
-     $('#fightButton').off('click');
- }
+ //////////////////////////////////////////////////
 
- database.ref(userDirectory + '/inGame').on('value', (snap) => {
-     if (snap.val() === true) {
-         enableButtons();
-     } else {
-         disableButtons();
-     }
+
+
+
+
+
+
+
+ allUsers.on('value', (snap) => {
+     allUsers.on('child_removed', (snap) => {
+         const removedIndex = snap.val().number
+         console.log(removedIndex)
+         if (userDirectory) {
+             console.log(userDirectory)
+             database.ref(userDirectory + '/number').once('value').then((snap) => {
+                 if (snap.val().number < removedIndex) {
+                     //do nothing
+                 } else {
+                     user.number = snap.val();
+                     if (user.number > 1) {
+                         user.number--;
+                         userRef.update({
+                             'number': user.number
+                         });
+                     }
+                 }
+             })
+         } else {
+             console.log('null')
+         }
+
+     })
+     userRef.onDisconnect().remove();
  })
 
  gameRef.on('value', (snap) => {
@@ -145,7 +147,28 @@ userRef.onDisconnect().remove();
              'running': false
          })
      }
+    
+     gameRef.on('child_removed', (snap) => {
+         console.log(snap.val().number);
+         console.log('removed')
+         if (snap.val().number === 1 && user.inGame === true) {
+             user.number = 1;
+             console.log(playerRef)
+             playerRef.update({
+                 'number': user.number
+             })
+         }
+         userRef.orderByChild('number').limitToFirst(1).once('value', (snap) => {
+             console.log(snap.key)
+         })
+        
+     })
+     if (playerRef) {
+        playerRef.onDisconnect().remove();
+     }
+     
  })
+ 
 
 
  ///////////////// Game Space ///////////////////////////
