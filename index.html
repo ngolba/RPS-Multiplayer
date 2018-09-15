@@ -23,16 +23,16 @@
                 <div class="card">
                     <div class="card-header text-center">Game</div>
                     <ul class="list-group list-group-flush">
-                        <!-- <li class="list-group-item text-center">Time: <span id="timeLeft">30</span></li> -->
+                        <li class="list-group-item text-center" id="queueRow">Place in Queue: <span id="placeQueue"></span></li>
                         <li class="list-group-item mx-auto">
                             <div class="btn-group-toggle" data-toggle="buttons">
-                                <label class="btn" sign="rock">
+                                <label class="btn rpsBtn" sign="rock">
                                     <input type="radio" id="rockImg"> <img src="assets/images/rockPlayer.png"></button>
                                 </label>
-                                <label class="btn" sign="paper">
+                                <label class="btn rpsBtn" sign="paper">
                                     <input type="radio" id="paperImg"> <img src="assets/images/paperPlayer.png"></button>
                                 </label>
-                                <label class="btn" sign="scissors">
+                                <label class="btn rpsBtn" sign="scissors">
                                     <input type="radio" id="scissorsImg"> <img src="assets/images/scissorsPlayer.png"></button>
                                 </label>
                             </div>
@@ -47,8 +47,9 @@
                                     <button type="button" class="btn" disabled id="player1Submitted">Not Submitted</button>
                                 </div>
                                 <div class="card">
-                                    <img class="card-img-top p-1" id="battleGround" src="assets/images/waiting.png" alt="versus image">
-                                    <button type="button" class="btn" disabled>Waiting</button>
+                                    <img class="card-img-top p-1 h-100" id="battleGround" src="assets/images/waiting.png" alt="versus image">
+                                    <button type="button" class="btn" disabled id="statusButton">Waiting</button>
+                
                                 </div>
                                 <div class="card">
                                     <img class="card-img-top p-1" id="player2Ready" src="assets/images/questionMark.png" alt="Card image cap">
@@ -66,10 +67,10 @@
                         <div class="card">
                             <div class="card-header text-center">Player Stats</div>
                             <ul class="list-group list-group-flush">
-                                <li class="list-group-item">Games Played: <span id="gamesPlayedDisplay"></span></li>
-                                <li class="list-group-item">Your Wins: <span id="playerDisplay"></span></li>
-                                <li class="list-group-item">Their Wins: <span id="opponentDisplay"></span></li>
-                                <li class="list-group-item">Ties: <span id="tiesDisplay"></span></li>
+                                <li class="list-group-item">Games Played: <span id="gamesPlayedDisplay">0</span></li>
+                                <li class="list-group-item">Your Wins: <span id="playerDisplay">0</span></li>
+                                <li class="list-group-item">Their Wins: <span id="opponentDisplay">0</span></li>
+                                <li class="list-group-item">Ties: <span id="tiesDisplay">0</span></li>
                             </ul>
                         </div>
                     </div>
