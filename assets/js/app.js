@@ -62,15 +62,12 @@ const submitAnswer = () => {
 }
 
 const enableButtons = () => {
-    console.log('enable buttons')
     $('#fightButton').off().on('click', () => {
         submitAnswer()
-        console.log('click')
     })
 }
 
 const disableButtons = () => {
-    console.log('disable buttons')
     $('#fightButton').off('click');
 }
 
@@ -92,17 +89,13 @@ const fillOpponentChoice = (opponentRef) => {
     opponentRef.on('child_changed', (snap) => {
         if (gameKey != snap.key && snap.val().choice) {
             opponentKey = snap.key
-            console.log(opponentKey)
             opponentChoice = snap.val().choice;
             if (opponentChoice) {
                 $(`#player2Ready`).attr('src', "assets/images/checkmark.png");
                 $(`#player2Submitted`).attr('disabled', false).addClass('btn-primary').text('Submitted');
             }
             opponentRef.off('child_changed');
-        } else {
-            console.log(`gameKey: ${gameKey}, snap.key: ${snap.key}, snap.val().choice: ${snap.val().choice}`)
-        }
-
+        } 
     })
 
 }
@@ -246,7 +239,6 @@ const decideWinner = (userChoice, oppChoice) => {
 ///////////
 // Initializes each player's spot in line on load 
 allUsers.once('value', function (snap) {
-    console.log('child added function')
     $('#userName').text(user.ID);
     user.number = snap.numChildren();
     userRef.update({
@@ -284,9 +276,7 @@ allUsers.on('child_removed', (snap) => {
                 }
             }
         })
-    } else {
-        console.log('null')
-    }
+    } 
 })
 userRef.onDisconnect().remove();
 
@@ -309,7 +299,6 @@ gameRef.on('value', (snap) => {
 })
 
 gameRef.on('child_removed', (snap) => {
-    console.log(user);
     opponentNumber = 0;
     submitted = 0;
     gameRef.update({
@@ -334,8 +323,6 @@ gameRef.on('child_removed', (snap) => {
             }
         })
     } else {
-        // user.number = 1;
-        console.log('second: ' + user)
         resetGame();
     }
 })
