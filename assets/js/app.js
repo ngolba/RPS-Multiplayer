@@ -39,66 +39,73 @@ const rpsArray = ['paper', 'scissors', 'rock'];
 /////////////// Necessary Functions
 
 const submitAnswer = () => {
-    submitted++;
     $(".rpsBtn").each(function () {
         if ($(this).hasClass('active')) {
             user.choice = $('.active').attr('sign');
             playerRef.update({
                 'choice': user.choice
             })
-            // database.ref('/game/submitted/').once('value', (snap) => {
-            //     submitted = snap.val();
-            // })
-            
-            gameRef.update({
-                'submitted': submitted
+            database.ref('/game/submitted/').once('value', (snap) => {
+                submitted = snap.val();
+                submitted++;
+                gameRef.update({
+                    'submitted': submitted
+                })
             })
-            console.log(submitted);
             // $(`#player1Ready`).attr('src', "assets/images/checkmark.png");
             $('#player1Ready').attr('src', `assets/images/${user.choice}Player.png`);
             $(`#player1Submitted`).attr('disabled', false).addClass('btn-primary').text('Submitted');
             disableButtons();
         }
     })
+
 }
 
 const enableButtons = () => {
-    $('#fightButton').click((event) => {
+    console.log('enable buttons')
+    $('#fightButton').off().on('click', () => {
         submitAnswer()
+        console.log('click')
     })
 }
+
 const disableButtons = () => {
+    console.log('disable buttons')
     $('#fightButton').off('click');
 }
 
 const setOpponent = () => {
-    if (user.number === 1) {
-        opponentNumber = 2;
+    if (opponentNumber) {
+        fillOpponentChoice(opponentRef);
     } else {
-        opponentNumber = 1;
+        if (user.number === 1) {
+            opponentNumber = 2;
+        } else {
+            opponentNumber = 1;
+        }
+        opponentRef = gameRef.orderByChild('number').equalTo(opponentNumber);
+        fillOpponentChoice(opponentRef);
     }
-    opponentRef = gameRef.orderByChild('number').equalTo(opponentNumber);
-    fillOpponentChoice(opponentRef);
 }
 
 const fillOpponentChoice = (opponentRef) => {
     opponentRef.on('child_changed', (snap) => {
         if (gameKey != snap.key && snap.val().choice) {
             opponentKey = snap.key
+            console.log(opponentKey)
             opponentChoice = snap.val().choice;
-            console.log('here')
             if (opponentChoice) {
                 $(`#player2Ready`).attr('src', "assets/images/checkmark.png");
                 $(`#player2Submitted`).attr('disabled', false).addClass('btn-primary').text('Submitted');
             }
             opponentRef.off('child_changed');
+        } else {
+            console.log(`gameKey: ${gameKey}, snap.key: ${snap.key}, snap.val().choice: ${snap.val().choice}`)
         }
 
     })
 
 }
-
-
 
 const directoryMover = (oldDirectory, newDirectory) => {
     oldDirectory.update({
@@ -112,9 +119,9 @@ const directoryMover = (oldDirectory, newDirectory) => {
         gameKey = newDirectory.push(file).key
         gameDirectory = '/game/' + gameKey;
         playerRef = database.ref(gameDirectory);
-        console.log(user)
     })
 }
+
 const playerChecker = () => {
     if (!user.inGame) {
         return false;
@@ -130,10 +137,10 @@ const resetGame = () => {
     opponentChoice = '';
     submitted = 0;
     $('#player1Ready, #player2Ready').attr('src', "assets/images/questionMark.png");
-    $('#player1Submitted, #player2Submitted').text('Not Submitted').removeClass('btn-success btn-danger').attr('disabled', true);
+    $('#player1Submitted, #player2Submitted').text('Not Submitted').removeClass('btn-success btn-danger btn-primary').attr('disabled', true);
     $('#statusButton').text('Waiting').attr('disabled', true);
     $('#battleGround').attr('src', "assets/images/waiting.png");
-    $("label[sign]").each(function () {
+    $(".rpsBtn").each(function () {
         $(this).removeClass('active')
     });
     playerRef.update({
@@ -142,6 +149,8 @@ const resetGame = () => {
     gameRef.update({
         'submitted': submitted
     })
+    enableButtons();
+    setOpponent();
 }
 
 const win = () => {
@@ -154,7 +163,6 @@ const win = () => {
     $('#player2Submitted').text('Loser').removeClass('btn-primary').addClass('btn-danger')
     setTimeout(() => {
         resetGame()
-        fillOpponentChoice(opponentRef)
     }, 3000)
 }
 
@@ -165,7 +173,6 @@ const loss = () => {
     $('#player1Submitted').text('Loser').removeClass('btn-primary').addClass('btn-danger')
     setTimeout(() => {
         resetGame()
-        fillOpponentChoice(opponentRef)
     }, 3000)
 }
 
@@ -179,7 +186,6 @@ const tie = () => {
     $('#player2Submitted').text('Tie').removeClass('btn-primary').addClass('btn-secondary')
     setTimeout(() => {
         resetGame()
-        fillOpponentChoice(opponentRef)
     }, 3000)
 }
 
@@ -240,6 +246,8 @@ const decideWinner = (userChoice, oppChoice) => {
 ///////////
 // Initializes each player's spot in line on load 
 allUsers.once('value', function (snap) {
+    console.log('child added function')
+    $('#userName').text(user.ID);
     user.number = snap.numChildren();
     userRef.update({
         'number': user.number
@@ -282,6 +290,8 @@ allUsers.on('child_removed', (snap) => {
 })
 userRef.onDisconnect().remove();
 
+///////////////// Game Space ///////////////////////////
+
 
 gameRef.on('value', (snap) => {
     if (snap.numChildren() === 4) {
@@ -299,18 +309,19 @@ gameRef.on('value', (snap) => {
 })
 
 gameRef.on('child_removed', (snap) => {
+    console.log(user);
+    opponentNumber = 0;
+    submitted = 0;
+    gameRef.update({
+        'submitted': submitted
+    })
     if (snap.val().number === 1 && user.inGame === true) {
         user.number = 1;
         playerRef.update({
             'number': user.number
         })
-        console.log(user);
-    }
-    submitted = 0;
-    gameRef.update({
-        'submitted': submitted
-    })
-    if (!user.inGame) {
+        resetGame();
+    } else if (!user.inGame) {
         userRef.once('value', (snap) => {
             if (snap.val().number === 1) {
                 user.number = 2;
@@ -318,9 +329,14 @@ gameRef.on('child_removed', (snap) => {
                     'number': user.number
                 })
                 $('#queueRow').slideUp();
+                $('#player1Name').text(`User: ${user.ID}`)
                 directoryMover(userRef, gameRef)
             }
         })
+    } else {
+        // user.number = 1;
+        console.log('second: ' + user)
+        resetGame();
     }
 })
 
@@ -328,8 +344,8 @@ database.ref('/game/running/').on('value', (snap) => {
     if (!snap.val()) {
         disableButtons();
     } else {
-        enableButtons();
         playerChecker();
+
     }
 })
 
@@ -345,4 +361,41 @@ database.ref('/game/submitted/').on('value', (snap) => {
 })
 
 
-///////////////// Game Space ///////////////////////////
+////////////////////// Chat Functionality //////////////////////
+
+
+let chatRef = database.ref('/chat/');
+
+const addText = (message, sender) => {
+    let chatMessage = {
+        sender: sender,
+        message: message
+    }
+    chatRef.push(chatMessage);
+}
+
+
+$('#chatEnterButton').click(() => {
+    let userMessage = $("#inputChat").val()
+    addText(userMessage, user.ID);
+})
+
+
+
+chatRef.on('child_added', (snap) => {
+    let sender = snap.val().sender;
+    let message = snap.val().message;
+    let snippit = `<li class='list-group-item chatMessages'>${sender}: ${message}</li>`
+    $('#chatArea').append(snippit);
+})
+
+database.ref('/chat/').on('value', (snap) => {
+    if (snap.numChildren() >= 6) {
+        database.ref('/chat/').orderByKey().limitToFirst(1).once('value', (snap) => {
+            let key = Object.keys(snap.val())[0]
+            database.ref('/chat/').child(key).remove()
+            $('#chatArea li:first-child').remove()
+        })
+
+    }
+})
